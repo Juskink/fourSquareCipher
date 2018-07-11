@@ -1,0 +1,126 @@
+package ie.gmit.dip;
+
+import java.util.Scanner;
+import java.io.*;
+
+public class Menu {
+	// instance variables of menu class are declared
+	private Scanner scan;
+	private boolean keepRunning = true;
+	private FourSquareCipher cipher;
+	private char[][] newArray = null;// this causes the nullpointer exception if no keyword is entered.
+	
+	
+
+	public Menu() {
+		//  assignment of a new scanner object to instance variable
+		scan = new Scanner(System.in);
+		// showMenu method and there after the processInput method are called continuously as long as "keeprunning" variable is true.
+		do {
+			showMenu();
+			processInput();
+		} while (keepRunning == true);
+
+	}
+	// showMenu method just prints out a menu
+	public void showMenu() {
+		System.out.println("------FOUR SQUARE CIPHER ---------\n Select one of the options below\n if you have not already entered keywords then you must begin with this step. Please choose option 1.\n");
+		System.out.println("1) Enter the keyword(s) for the cipher ");
+		System.out.println("2) Encrypt text from file or url");
+		System.out.println("3) Decrypt text from file or url");
+		System.out.println("4) Quit");
+
+	}
+
+	public void processInput() throws NumberFormatException {
+		String input = scan.nextLine();
+		cipher = new FourSquareCipher();
+		// try catch statement has been added for whenever the user enters anything else other than a number in the command line.
+		try {
+			int choice = Integer.parseInt(input);
+			// switch statement is used in order to process the input options of the user which could be one of 4 options/branches
+			switch (choice) {
+			case 1:
+				newArray = enterKeysMenu();// the changed char [][] array has been brought up the chain to be 
+				// fed down to the other methods by means of passing arguments into the arrays.
+				break;
+			case 2:
+				encryptMenu();
+				break;
+			case 3:
+				decryptMenu();
+				break;
+			case 4:
+				keepRunning = false;
+				break;
+			default:
+				System.out.println("Invalid selection.");
+				break;
+			}
+		} catch (NumberFormatException nfe) {
+			System.out.println("Please enter a number between 1-4 to make a selection");
+		}
+		
+
+		
+
+	}
+	
+	
+		
+	
+	public char[][] enterKeysMenu() {
+		
+		// the user is asked for input
+		System.out.println("Please enter the first keyword (duplicate letters will be removed) ");
+		String key1 = scan.nextLine();
+		Parser p = new Parser();
+		//that input is passed to the parseKey method of the Parser class
+		char[] newKey= p.parseKey(key1);
+		// the returned char[] array from the parseKey method is assigned to the newKey variable
+		// the newKey-char[] array is then passed to the setNewkeyUpperRight method of the FourSquareCipher class.
+		cipher.setNewKeyUpperRight(newKey);
+		
+		
+		System.out.println("Please enter the second keyword (duplicate letters will be removed)");
+		String key2 = scan.nextLine();
+		char[] newKey2= p.parseKey(key2);
+		newArray = cipher.setNewKeyBottomLeft(newKey2);// this is the matrix array with the keys added
+		System.out.println("The ciphertext squares of the four square matrix have been populated successfully");
+		System.out.println("You can now encrypt or decrypt your document\n");
+		return newArray;
+	}
+	
+	public void encryptMenu() {
+		// the user is asked to enter a file name or url path
+		System.out.println("please enter your file name (include file extension)\n or url that you wish to be encrypted ");
+		String input = scan.nextLine();
+		Parser p = new Parser();
+		// input is passed into the parseEncrypt method of the Parse class.
+		p.parseEncrypt(input, Parser.isValid(input),newArray);
+		System.out.println("your encrypted text has been saved to the file: encrypted.txt");
+		
+	}
+
+	public void decryptMenu() {
+		System.out.println("please enter your file name(include file extension)\n or url that you wish to be decrypted ");
+		String input = scan.nextLine();
+		Parser p = new Parser();
+		String [] result = p.parseDecrypt(input, Parser.isValid(input), newArray);
+		System.out.println("your decrypted text has been saved to the file: decrypted.txt");
+	}
+	
+	  public void printmulti() {
+			for(int row=0;row<newArray.length;row++) {
+				System.out.print("{");
+				for(int col = 0;col<newArray[row].length;col++) {
+					System.out.print(" " +newArray[row][col]+ " ,");
+				}
+				System.out.println("}");
+			}
+			
+		}
+		
+	
+
+}
