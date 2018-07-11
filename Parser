@@ -1,0 +1,181 @@
+package ie.gmit.dip;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+
+
+public class Parser {
+	private String[] charPairs = new String[100];
+	
+	
+	public static boolean isValid(String url){
+		try {
+	           new URL(url).toURI();
+	           return true;
+	        }
+	        catch (Exception e) {
+	           return false;
+	        }
+	}
+
+	public String[] parseEncrypt (String resource, boolean isUrl, char[][] newArrayofArrays) {
+		BufferedReader br = null;
+		
+		
+			try {
+				if(isUrl) {
+					// buffer reader is assigned the value of an openinputstream if its a url
+					br = new BufferedReader(new InputStreamReader(new URL(resource).openStream()));
+				}else {
+					// buffer reader is assigned the value of an fileinputstream if its a file
+					br = new BufferedReader(new InputStreamReader(new FileInputStream(resource)));
+				
+				}
+				FileWriter fw = new FileWriter("encrypted.txt");	
+				String line = null;
+				
+				while ((line = br.readLine()) != null){
+					// any characters that are not alphanumeric are removed and replaced with "" and all characters are made uppercase to match the matrix array.
+					line = line.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+					// to ensure an even length of line an X has been added to the line when the line is uneven.
+						if ((line.length() % 2) != 0) {
+							line = line + "X";					
+						}
+					// a string array of pairs of characters is the created from line.
+					String[] bigrams = line.split("(?<=\\G.{2})");
+					// a new FourSquareCipher object is created
+					FourSquareCipher cipher = new FourSquareCipher(newArrayofArrays);
+					// the string array bigrams is passed to the encrypt method of the FourSquareCipher class line by line.
+					String encryptedtext = cipher.encrypt(bigrams);
+					// the encrypted text is then added to the file per line
+					fw.write(encryptedtext + "\n");
+					
+				}
+				// the input streams and most importantly the writer streams are closed.
+				br.close();
+				fw.flush();
+				fw.close();		
+				
+			} catch (MalformedURLException e) {
+				System.out.println("an incorrect URL has been encountered, please use a correctly formatted url");
+				
+			} catch (IOException e) {
+				System.out.println("File not found "+ resource +" did you forget the file extension?");
+				
+			}
+						
+		return charPairs;
+	}
+	
+	public String[] parseDecrypt (String resource, boolean isUrl, char[][] newArrayofArrays) {
+		BufferedReader br = null;
+		
+		
+			try {
+				if(isUrl) {
+					br = new BufferedReader(new InputStreamReader(new URL(resource).openStream()));
+				}else {
+					br = new BufferedReader(new InputStreamReader(new FileInputStream(resource)));
+				
+				}
+				FileWriter fw = new FileWriter("decrypted.txt");	
+				String line = null;
+				
+				while ((line = br.readLine()) != null){
+					// any characters that are not alphanumeric are removed and replaced with "" and all characters are made uppercase to match matrix.
+					line = line.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+					// to ensure an even length of line an X has been added to the line when the line is uneven.
+						if ((line.length() % 2) != 0) {
+							line = line + "X";					
+						}
+					// a string array of pairs of characters is the created from line.
+					String[] bigrams = line.split("(?<=\\G.{2})");
+					
+					FourSquareCipher cipher = new FourSquareCipher(newArrayofArrays);
+					String encryptedtext = cipher.decrypt(bigrams);
+					fw.write(encryptedtext + "\n");
+					
+				}
+				
+				br.close();
+				fw.flush();
+				fw.close();		
+				
+			} catch (MalformedURLException e) {
+				
+				e.printStackTrace();
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+						
+		return charPairs;
+	}
+	
+	
+	  public char[] parseKey(String parse){
+		  	// passed string is converted to upper case
+		    parse = parse.toUpperCase();
+		    // anything that is not A-Z in upper case is removed and any j's are replaced with i's
+		    parse = parse.replaceAll("[^A-Z]", "").replace("J", "I");;
+		    String alphabet =  "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+		    // the whole alphabet is added to the end of the parse string
+		    String keyword = parse + alphabet;
+		    // this keyword is then stripped of any duplicate letters while keeping its original order.
+		    keyword = removeDuplicates(keyword);
+		    // the stripped down string is then returned as a char[] array.
+		    return keyword.toCharArray();
+		    
+		  }
+	  
+	  static String removeDuplicates(String s) {
+		  // a new stringbuilder is created
+		    StringBuilder noDupes = new StringBuilder();
+		    // the string is traversed 
+		    for (int i = 0; i < s.length(); i++) {
+		        String si = s.substring(i, i + 1);
+		        // where the substring of one letter is not part of the stringbuilder then append it to the stringbuilder
+		        if (noDupes.indexOf(si) == -1) {
+		            noDupes.append(si);
+		        }
+		    }
+		    // return the string without duplicates
+		    return noDupes.toString();
+		}
+	
+	
+	
+	/*
+	public void addBigrams (String[] s) {
+		for (int i = 0; i < s.length; i++) {
+			append(s[i]);
+		}
+		
+	}
+	
+	public void append(String s) {
+		// if there is not enough capacity in the char pairs array then the array length is doubled(? this is probably a little bit like napalm for ants in the garden but it'll get the job done) in order to accommodate the new array.
+		ensureCapacity();
+		// each string in the bigrams string array is then added to the charPairs array.
+		charPairs[index] = s;
+		//System.out.println(charPairs[index]); - used in testing the code
+		index++;
+		//System.out.println(index);- used in testing the code
+
+	}
+	
+	private void ensureCapacity() {
+		if (index >= charPairs.length) {
+			String[] temp = new String[charPairs.length * 2];
+			for (int i = 0; i < charPairs.length; i++) {
+				temp[i] = charPairs[i];
+			}
+			
+			charPairs = temp;
+		}
+	}
+
+	*/
+}
