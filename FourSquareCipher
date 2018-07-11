@@ -1,0 +1,175 @@
+package ie.gmit.dip;
+
+public class FourSquareCipher {
+	private char[][] matrix = {
+			{'A', 'B', 'C', 'D', 'E', 'Z', 'G', 'P', 'T', 'F'},
+			{'F', 'G', 'H', 'I', 'K', 'O', 'I', 'H', 'M', 'U'},
+			{'L', 'M', 'N', 'O', 'P', 'W', 'D', 'R', 'C', 'N'},
+			{'Q', 'R', 'S', 'T', 'U', 'Y', 'K', 'E', 'Q', 'A'},
+			{'V', 'W', 'X', 'Y', 'Z', 'X', 'V', 'S', 'B', 'L'},
+			{'M', 'F', 'N', 'B', 'D', 'A', 'B', 'C', 'D', 'E'},
+			{'C', 'R', 'H', 'S', 'A', 'F', 'G', 'H', 'I', 'K'},
+			{'X', 'Y', 'O', 'G', 'V', 'L', 'M', 'N', 'O', 'P'},
+			{'I', 'T', 'U', 'E', 'W', 'Q', 'R', 'S', 'T', 'U'},
+			{'L', 'Q', 'Z', 'K', 'P', 'V', 'W', 'X', 'Y', 'Z'}
+		};
+			
+	public FourSquareCipher() {
+		
+	}
+
+	public FourSquareCipher (char[][] setMatrix){
+		this.matrix=setMatrix;
+	}
+			
+	
+
+	public void setNewKeyUpperRight(char[] key){ 
+		  int i=0;
+		  while(i<key.length) {
+			  // each character in the upperRight quadrant of the matrix array rows 0-5, columns 5-10
+			  // is then replaced with key[i] the character at index i from the passed in array and i is incremented.
+			  for(int row = 0;row<5;row++) {
+				  for(int col = 5;col<10;col++) {
+					matrix[row][col] = key[i];
+					i++;
+				  }
+			  }
+		        
+		  }
+		  
+	 }
+	  
+	public char[][] setNewKeyBottomLeft(char[] key){ 
+		  int i=0;
+		  while(i<key.length) {
+			  // each character in the bottom left quadrant of the matrix array rows 0-5, columns 5-10
+			  // is then replaced with key[i] the character at index i from the passed in array and i is incremented.
+			  for(int row = 5;row<10;row++) {
+				  for(int col = 0;col<5;col++) {
+					matrix[row][col] = key[i];
+					i++;
+				  }
+			  }
+		  }
+		  return matrix;
+	 } 
+	  
+	public void printmulti() {
+			for(int row=0;row<matrix.length;row++) {
+				System.out.print("{");
+				for(int col = 0;col<matrix[row].length;col++) {
+					System.out.print(" " +matrix[row][col]+ " ,");
+				}
+				System.out.println("}");
+			}
+			
+		}
+	  
+	public String encrypt(String[] couples) {
+		char plainLet1, plainLet2;
+		// a new stringbuilder object is created
+		StringBuilder ciphertext = new StringBuilder();
+		// the passed string array is traversed
+		for(int i=0;i<couples.length;i++) {
+			// as long as the bigram-string at each index of the array is not null or full of white space then:
+			if (couples[i] != null && couples[i].trim().length()>0) {
+				// char variables are assigned the plain-text char's at index 0 and 1 of the bigram-string
+				plainLet1 = couples[i].charAt(0);
+				plainLet2 = couples[i].charAt(1);
+				// the encrypted bigram string of the two original plain-text chars is appended to the stringbuilder
+				ciphertext.append(encryptbigrams(plainLet1, plainLet2));
+			}		
+			
+		}
+		
+		// the completed stringbuilder is then returned as a string.
+		
+		return ciphertext.toString();
+	}
+	
+	public String encryptbigrams (char a, char b) {
+		int xFirst = 0, yFirst = 0, xSecond = 0, ySecond = 0; 
+		StringBuilder cipherbigram = new StringBuilder();
+		// the first character 'a' of the bigram locates its position in the upper-left portion of the cipher square
+		
+			for(int row1=0;row1<5;row1++) {
+				for(int col1=0;col1<5;col1++) {
+					if(matrix[row1][col1]==a) {
+						// variables are used to store the index no's of the row and column of the char locations in the matrix array.
+						xFirst = row1;
+						yFirst = col1;
+					}
+				}
+			}
+			// the second character 'b' of the bigram locates its position in the lower-right portion of the cipher square	
+			for(int row4=5;row4<10;row4++) {
+				for(int col4=5;col4<10;col4++) {
+					if(matrix[row4][col4]==b) {
+						// variables are used to store the index no's of the row and column of the char locations in the matrix array.
+						xSecond = row4;
+						ySecond = col4;
+					}
+				}
+			}
+			/* a stringbuilder then combines the intersection points at the intersection of the
+			row of char 'a' above with the column of char 'b' above in the bottom right square and at the intersection of the
+			column of char 'a' with the row of char 'b' */
+			cipherbigram.append(matrix[xFirst][ySecond]).append(matrix[xSecond][yFirst]);
+			
+		// an encrypted bigram string is then returned to the encrypt method
+		return cipherbigram.toString();
+		
+	}
+	
+	public String decrypt(String[] couples) {
+		char encryptLet1, encryptLet2;
+		StringBuilder plaintext = new StringBuilder();
+		for(int i=0;i<couples.length;i++) {
+			if (couples[i] != null && couples[i].trim().length()>0) {
+				encryptLet1 = couples[i].charAt(0);
+				encryptLet2 = couples[i].charAt(1);
+				//
+				plaintext.append(decryptbigrams(encryptLet1, encryptLet2));
+			}		
+			
+		}
+		//System.out.println(ciphertext.toString());
+		return plaintext.toString();
+	}	
+	
+	public String decryptbigrams (char a, char b) {
+		int xFirst = 0, yFirst = 0, xSecond = 0, ySecond = 0; 
+		StringBuilder cipherbigram = new StringBuilder();
+		// the first character 'a' of the bigram locates its position in the upper-left portion of the cipher square
+			for(int row2=0;row2<5;row2++) {
+				for(int col2=5;col2<10;col2++) {
+					if(matrix[row2][col2]==a) {
+						// variables are used to store the index no's of the row and column of the char locations in the matrix array.
+						xFirst = row2;
+						yFirst = col2;
+					}
+				}
+			}
+			// the second character 'b' of the bigram locates its position in the lower-right portion of the cipher square	
+			for(int row3=5;row3<10;row3++) {
+				for(int col3=0;col3<5;col3++) {
+					if(matrix[row3][col3]==b) {
+						// variables are used to store the index no's of the row and column of the char locations in the matrix array.
+						xSecond = row3;
+						ySecond = col3;
+					}
+				}
+			}
+			/* a stringbuilder then combines the intersection points at the intersection of the
+			row of char 'a' above with the column of char 'b' above in the bottom right square and at the intersection of the
+			column of char 'a' with the row of char 'b' */
+			cipherbigram.append(matrix[xFirst][ySecond]).append(matrix[xSecond][yFirst]);
+			
+			
+		// a bigram string is then returned to encrypt method
+		return cipherbigram.toString();
+	}
+	 
+	
+}
